@@ -28,7 +28,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.]]
 
 addon.name    = 'smartskillup'
 addon.author  = 'CrimsonOrion(Ashita v4 port) (Based on RolandJ Windower addon)'
-addon.version = '0.0.2-ashitaV4'
+addon.version = '0.0.3-ashitaV4'
 addon.desc    = 'Automatically skills up magic using your known, castable, weighted spells.'
 addon.link    = 'https://github.com/CrimsonOrion/SmartSkillup-ashitav4'
 
