@@ -58,3 +58,6 @@ An Ashita v4 port of RolandJ's Windower addon [SmartSkillup](https://github.com/
 - **ARCHON:** helped with various details about the original UI.
 - **KAIN:** for not giving RolandJ an Echad ring until the original was released.
 - **Ashita addons:** `blusets` (BLU memory layout), `debuff` (buff cancel packet), `lin` libs (action packet layout), and `imrecast`/`wheel`/`xitools` (event-running memory check), all used as references for the port.
+
+## License
+BSD 3-Clause, inherited from the original SmartSkillup. See [LICENSE](LICENSE).
