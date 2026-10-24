@@ -1,6 +1,6 @@
 # SmartSkillup (Ashita v4)
 
-An Ashita v4 port of RolandJ's Windower addon [SmartSkillup](https://github.com/RolandJ/SmartSkillup).
+An Ashita v4 port of RolandJ's Windower addon [SmartSkillup](https://github.com/Roland-J/SmartSkillup).
 
 ## Instructions
 1. Put this addon's files in `Ashita/addons/smartskillup/`. The folder must be named `smartskillup` to match `smartskillup.lua`.
@@ -37,7 +37,7 @@ An Ashita v4 port of RolandJ's Windower addon [SmartSkillup](https://github.com/
     - **Radial Arcana** (automatic): used below 60% MP with a luopan out, on GEO 75+ with the merit.
 
 ## Differences from the Windower version
-- **UI** rebuilt in ImGui with the same controls. Drag it by any empty space; `uiscale`, `uipos`, `uihide`/`uishow`, and `uidefaults` still work.
+- **UI** recreated in ImGui using the original button images and layout. As before, right-drag to move it and scroll to zoom; `uiscale`, `uipos`, `uihide`/`uishow`, and `uidefaults` still work. Text uses Arial Bold Italic from your Windows fonts, falling back to ImGui's default font if it's missing.
 - **Commands** use `/sms` in place of `//sms`. `/sms debug off` turns off all debug modes.
 - **Skill levels** are read from game memory, so no skill-data requests or initialization retries are needed.
 - **Windower events** (buff gain/loss, status, job, level, zone, item moves, newly learned spells) are replaced by per-frame and periodic checks of game state.

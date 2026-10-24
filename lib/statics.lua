@@ -48,6 +48,61 @@ statics.modules_order = { -- used to build the modules in a strict order
 	'sublim',
 }
 
+statics.module_help = { -- shared by /sms modulehelp and the UI's MODULES popup (job_only: needs a relevant main job)
+	{key = 'mp_limit', name = 'MP Limit',     text = 'Only spells below the current limit will be auto-cast.'},
+	{key = 't_target', name = 'Trust Target', text = 'Ensures a targetable trust is summoned, as their ilvl mob status boosts skillup rate.'},
+	{key = 'food',     name = 'SkillUp Food', text = 'Uses the best magic food available in your inventory, sack, satchel, or case.'},
+	{key = 'moogle',   name = 'Moogle',       text = 'Summons the "Moogle" trust to utilize its refresh and skillup rate boost.', job_only = true},
+	{key = 'convert',  name = 'Convert',      text = 'Uses convert when MP is below 25%. Requires a cure spell for use in recovering.', job_only = true},
+	{key = 'refresh',  name = 'Refresh',      text = 'Casts the most potent refresh available to your main/sub jobs.', job_only = true},
+	{key = 'haste',    name = 'Haste',        text = 'Casts the most potent haste available to your main/sub jobs.', job_only = true},
+	{key = 'georef',   name = 'Geo-Refresh',  text = 'Sustains a Geo-Refresh colure on the player.', job_only = true},
+	{key = 'sublim',   name = 'Sublimation',  text = 'Automatically activates and completes Sublimation.', job_only = true},
+}
+
+statics.command_help = { -- shared by /sms help and the UI's HELP popup
+	{section = 'Session', commands = {
+		{'go',           'Activates a skillup session. Cannot activate if no skills have been added.'},
+		{'stop',         'If active, deactivates the skillup session and provides a skillup report.'},
+		{'pause',        'If active, toggles the session\'s paused/unpaused state.'},
+		{'pauseon',      'If active and unpaused, pauses the session.'},
+		{'pauseoff',     'If active and paused, unpauses the session.'},
+		{'autoshutdown', 'If active, will perform /shutdown when the session\'s last remaining skill is capped.'},
+		{'resetsession', 'Deactivates any active skillup session and removes all selected skills. (called on job change)'},
+	}},
+	{section = 'Skills', commands = {
+		{'addskill',     'If skillable by the player\'s main job, adds the given skill to the current skillup session.'},
+		{'delskill',     'Removes the given skill from the current skillup session.'},
+		{'togskill',     'Adds/removes, if applicable, the given skill from the current skillup session.'},
+		{'spellreport',  'Prints the spells SmartSkillup will use. Do "/sms spellreport weighted" to see the spell weights!'},
+	}},
+	{section = 'Modules', commands = {
+		{'addmodule',    'Turns on the selected module. (Modules are additional misc skillup logic.)'},
+		{'delmodule',    'Turns off the selected module. (Modules are additional misc skillup logic.)'},
+		{'mplimit',      'An optional limit to provide heavier MP conservation; any spells above this limit will be skipped.'},
+		{'modulehelp',   'Displays additional information on each module.'},
+		{'automodules',  'Displays information on the automatic modules not listed in the UI.'},
+	}},
+	{section = 'UI', commands = {
+		{'uihide',       'Hides the UI if it was visible. (persists on reload)'},
+		{'uishow',       'Reveals the UI if it was hidden. (persists on reload)'},
+		{'uiscale',      'Returns the UI scale or sets it to the provided scale. (persists on reload)'},
+		{'uipos',        'Returns the UI position or sets it to the provided x/y coordinates. (persists on reload)'},
+		{'uirebuild',    'Snaps the UI back to its saved position.'},
+		{'uidefaults',   'Returns the UI to the default position and scale. (wipes all persisting settings)'},
+	}},
+	{section = 'Other', commands = {
+		{'debug',        'Toggles debug-level logging ("debug" or "debug deep") and allows capped skills to be added. "debug off" disables all modes.'},
+		{'help',         'Shows this help text.'},
+	}},
+}
+
+statics.help_tips = {
+	'You can only receive skillups for skills natively available to your current main job.',
+	'The UI can be dragged with right mouse clicks or zoomed with scroll! Try it out!',
+	'For additional module information, type "/sms modulehelp" or hover over MODULES!',
+}
+
 statics.numerals ={'',' II',' III',' IV',' V',' VI'}
 
 statics.bags_ordered = { -- used for iterating bags, always processing inventory first (ids are Ashita container ids)

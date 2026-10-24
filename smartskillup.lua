@@ -801,6 +801,10 @@ ashita.events.register('d3d_present', 'sms_present', function()
 	ui.render()
 end)
 
+ashita.events.register('load', 'sms_load', function()
+	ui.load_font() -- fonts must be added here, never mid-frame
+end)
+
 ashita.events.register('unload', 'sms_unload', function()
 	util.cancel_all()
 	save_settings()
@@ -1130,15 +1134,10 @@ function handle_command(cmd)
 		print_spell_availability(cmd[2] and cmd[2]:lower() == 'weighted')
 	elseif sub == 'modulehelp' then
 		logger(chat_colors.grey, 'SmartSkillup  v' .. addon.version .. ' modules:')
-		logger(chat_colors.grey, 'MP Limit:     Only spells below the current limit will be auto-cast.')
-		logger(chat_colors.grey, 'Trust Target: Ensures a targetable trust is summoned, as their ilvl mob status boosts skillup rate.')
-		logger(chat_colors.grey, 'SkillUp Food: Uses the best magic food available in your inventory, sack, satchel, or case.')
-		logger(chat_colors.grey, '*Moogle:      Summons the "Moogle" trust to utilize its refresh and skillup rate boost.')
-		logger(chat_colors.grey, '*Convert:     Uses convert when MP is below 25%. Requires a cure spell for use in recovering.')
-		logger(chat_colors.grey, '*Refresh:     Casts the most potent refresh available to your main/sub jobs.')
-		logger(chat_colors.grey, '*Haste:       Casts the most potent haste available to your main/sub jobs.')
-		logger(chat_colors.grey, '*Geo-Refresh: Sustains a Geo-Refresh colure on the player.')
-		logger(chat_colors.grey, '*Sublimation: Automatically activates and completes Sublimation.')
+		for _, help in ipairs(statics.module_help) do
+			local label = (help.job_only and '*' or '') .. help.name .. ':'
+			logger(chat_colors.grey, label .. string.rep(' ', math.max(1, 14 - #label)) .. help.text)
+		end
 		logger(chat_colors.grey, 'NOTE: Modules marked with * are only available when the player is on a relevant main job.')
 	elseif sub == 'automodules' then
 		logger(chat_colors.grey, 'SmartSkillup  v' .. addon.version .. ' auto modules:')
@@ -1147,33 +1146,15 @@ function handle_command(cmd)
 	elseif sub == 'help' then
 		logger(chat_colors.grey, 'SmartSkillup  v' .. addon.version .. ' commands:')
 		logger(chat_colors.grey, '/sms [command]')
-		logger(chat_colors.grey, 'addskill     - If skillable by the player\'s main job, adds the given skill to the current skillup session.')
-		logger(chat_colors.grey, 'delskill     - Removes the given skill from the current skillup session.')
-		logger(chat_colors.grey, 'togskill     - Adds/removes, if applicable, the given skill from the current skillup session.')
-		logger(chat_colors.grey, 'mplimit      - An optional limit to provide heavier MP conservation; any spells below this limit will be skipped.')
-		logger(chat_colors.grey, 'go           - Activates a skillup session. Cannot activate if no skills have been added.')
-		logger(chat_colors.grey, 'stop         - If active, deactivates the skillup session and provides a skillup report.')
-		logger(chat_colors.grey, 'pause        - If active, toggles the session\'s paused/unpaused state.')
-		logger(chat_colors.grey, 'pauseon      - If active and unpaused, pauses the session.')
-		logger(chat_colors.grey, 'pauseoff     - If active and paused, unpauses the session.')
-		logger(chat_colors.grey, 'autoshutdown - If active, will perform /shutdown when the session\'s last remaining skill is capped.')
-		logger(chat_colors.grey, 'addmodule    - Turns on the selected module. (Modules are additional misc skillup logic.)')
-		logger(chat_colors.grey, 'delmodule    - Turns of the selected module. (Modules are additional misc skillup logic.)')
-		logger(chat_colors.grey, 'resetsession - Deactivates any active skillup session and removes all selected skills. (called on job change)')
-		logger(chat_colors.grey, 'uihide       - Hides the UI if it was visible. (persists on reload)')
-		logger(chat_colors.grey, 'uishow       - Reveals the UI if it was hidden. (persists on reload)')
-		logger(chat_colors.grey, 'uiscale      - Returns the UI scale or sets it to the provided scale. (persists on reload)')
-		logger(chat_colors.grey, 'uipos        - Returns the UI position or sets it to the provided x/y coordinates. (persists on reload)')
-		logger(chat_colors.grey, 'uirebuild    - Snaps the UI back to its saved position.')
-		logger(chat_colors.grey, 'uidefaults   - Returns the UI to the default position and scale. (wipes all persisting settings)')
-		logger(chat_colors.grey, 'debug        - Toggles debug-level logging ("debug" or "debug deep") and allows capped skills to be added. "debug off" disables all modes.')
-		logger(chat_colors.grey, 'spellreport  - Prints the spells SmartSkillup will use. Do "/sms spellreport weighted" to see the spell weights!')
-		logger(chat_colors.grey, 'modulehelp   - Displays additional information on each module.')
-		logger(chat_colors.grey, 'automodules  - Displays information on the automatic modules not listed in the UI.')
-		logger(chat_colors.grey, 'help         - Shows this help text.')
-		logger(chat_colors.grey, 'DID YOU KNOW: You can only recieve skillups for skills natively available to your current main job.')
-		logger(chat_colors.grey, 'DID YOU KNOW: The UI can be dragged by any empty space in the window!')
-		logger(chat_colors.grey, 'DID YOU KNOW: For additional module information, type "/sms modulehelp"!')
+		for _, group in ipairs(statics.command_help) do
+			logger(chat_colors.grey, '-- ' .. group.section .. ' --')
+			for _, entry in ipairs(group.commands) do
+				logger(chat_colors.grey, entry[1] .. string.rep(' ', math.max(1, 13 - #entry[1])) .. '- ' .. entry[2])
+			end
+		end
+		for _, tip in ipairs(statics.help_tips) do
+			logger(chat_colors.grey, 'DID YOU KNOW: ' .. tip)
+		end
 	else
 		handle_command({'help'})
 	end

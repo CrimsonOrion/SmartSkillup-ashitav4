@@ -264,15 +264,24 @@ end
 
 function process_skill_data(get_skill)
 	logger(chat_colors.purple, '[SKILL DATA] Processing skill level/cap data...', true)
+	-- JOB CHANGE IN PROGRESS: the server sends the new job's skill data before the re-initialize, so the old job's
+	-- skills can look newly capped (ex: magic on WAR); skip cap processing until the new job's skills are loaded
+	local job_changing = me.awaiting_initialize or AshitaCore:GetMemoryManager():GetPlayer():GetMainJob() ~= me.main_job_id
 	for skill, data in pairs(main_skills) do
 		local level, capped = get_skill(data.id)
 		-- CAPTURE INITIAL LEVEL
 		if data.level == nil then
 			data.level_init, data.capped = level, capped
 		-- SKILL CAP/UNCAP (uncap on levelup)
-		elseif capped ~= data.capped and not me.awaiting_initialize then
-			if capped then
+		elseif capped ~= data.capped and not job_changing then
+			-- A REAL CAP: the skill rose and capped in the same update
+			-- (on a job that can't use the skill, the server reports level 0 + capped, so require a rise)
+			if capped and level > data.level then
 				logger(chat_colors.green, '[SKILL CAP] Congratulations, "' .. skill .. '" skill has capped!')
+				remove_skill_from_session(data.en, true)
+			-- CAPPED WITHOUT A SKILLUP (ex: level sync lowered the cap): only matters if it's in the session
+			elseif capped and level == data.level and util.contains(skills_to_skillup, data.en) then
+				logger(chat_colors.yellow, '[SKILL CAP] "' .. skill .. '" is capped at your current level; removing it from the session.')
 				remove_skill_from_session(data.en, true)
 			end
 		end
