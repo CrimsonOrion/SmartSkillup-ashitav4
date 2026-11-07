@@ -29,6 +29,7 @@ An Ashita v4 port of RolandJ's Windower addon [SmartSkillup](https://github.com/
     - **SkillUp Food:** uses the best magic skillup food in your inventory, satchel, sack, or case, moving it into your inventory if needed.
     - **Moogle:** summons the Moogle trust for its refresh and skillup rate boost.
     - **Convert:** uses Convert when MP is below 25%.
+    - **Elemental Siphon** (new in the Ashita port): below 50% MP, summons the spirit matching the day, uses Elemental Siphon, then releases it. When skilling Summoning Magic, it reuses the spirits the skillup loop summons.
     - **Refresh:** casts the most potent refresh available to your main or sub job (Refresh I–III, Battery Charge).
     - **Haste:** casts the most potent haste available to your main or sub job (Haste I–II, Erratic Flutter).
     - **Geo-Refresh:** keeps a Geo-Refresh colure on you.

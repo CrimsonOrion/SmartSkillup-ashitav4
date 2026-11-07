@@ -569,6 +569,11 @@ function determine_modules()
 		modules.convert.available = true -- res already populated
 		schedule_module_readiness(modules.convert, true)
 	end
+	-- ELEMENTAL SIPHON MODULE
+	if modules.siphon.res and ((me.main_job == 'SMN' and me.main_job_level >= 50) or (me.sub_job == 'SMN' and me.sub_job_level >= 50)) then
+		modules.siphon.available = true -- res already populated
+		schedule_module_readiness(modules.siphon, true)
+	end
 	-- COMPOSURE MODULE
 	if modules.compo.res and me.main_job == 'RDM' and me.main_job_level >= 50 then --not available to lv50 sj
 		modules.compo.available = true -- res already populated

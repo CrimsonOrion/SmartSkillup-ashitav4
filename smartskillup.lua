@@ -55,6 +55,7 @@ if not targets_ok then -- the lib errors if its memory signatures fail; keep <t>
 		get_bt = function() return nil end,
 	}
 end
+local time_ok, timelib = pcall(require, 'ffxi.time') -- errors if its memory signatures fail; Siphon then skips day matching
 require('lib.helpers')
 require('lib.me')
 
@@ -126,6 +127,7 @@ modules_default = {
 	georef   = {label = 'Geo-Ref.', available = false, hidden = false, res = res.spell_by_name('Geo-Refresh')},
 	sublim   = {label = 'Sublim.' , available = false, hidden = false, res = res.ability_by_name('Sublimation')},
 	convert  = {label = 'Convert' , available = false, hidden = false, res = res.ability_by_name('Convert')},
+	siphon   = {label = 'Siphon'  , available = false, hidden = false, res = res.ability_by_name('Elemental Siphon')},
 	compo    = {label = 'Compos.' , available = false, hidden = true , res = res.ability_by_name('Composure')},
 	radial   = {label = 'Radial.A', available = false, hidden = true , res = res.ability_by_name('Radial Arcana')},
 }
@@ -230,8 +232,83 @@ local function cast(prefix, name, target)
 	util.input(prefix .. ' "' .. name .. '"' .. (target and ' ' .. target or ''))
 end
 
+-- The spirit for Elemental Siphon (returns spirit, matches_day):
+-- 1. today's spirit, if it's already out
+-- 2. any other spirit already out, if today's spirit can't be cast right now (unknown or on recast) - no need to swap
+-- 3. otherwise summon today's spirit if it's off recast, or else the first known spirit that's off recast
+local function siphon_spirit(pet)
+	local ok, weekday = false, nil
+	if time_ok then ok, weekday = pcall(timelib.get_game_weekday) end
+	local preferred = ok and type(weekday) == 'number' and statics.spirits_by_weekday[weekday + 1]
+	local pet_spirit, day_spirit, day_castable, fallback
+	for _, name in ipairs(statics.spirits_by_weekday) do
+		local spirit = res.spell_by_name(name)
+		if spirit and is_valid(spirit, 'Summoning Magic', true) then
+			local off_recast = spell_recast(spirit.id) == 0
+			if pet and util.fuzzy(pet.Name) == util.fuzzy(spirit.en) then pet_spirit = spirit end
+			if name == preferred then
+				day_spirit, day_castable = spirit, off_recast
+			elseif off_recast then
+				fallback = fallback or spirit
+			end
+		end
+	end
+	if pet_spirit and pet_spirit == day_spirit then return pet_spirit, true end
+	if pet_spirit and not day_castable then return pet_spirit, false end
+	if day_castable then return day_spirit, true end
+	return fallback, false
+end
+
+-- ELEMENTAL SIPHON MODULE: summon today's spirit > Elemental Siphon > release. Returns true while it's acting.
+-- Pet commands and abilities are refused for ~3 secs after a summon completes (see me.last_summon_at).
+local function siphon_step()
+	local mod = modules.siphon
+	if not mod or not mod.active then return false end
+	local pet = get_pet()
+	local settling = util.now() - (me.last_summon_at or 0) < 3
+
+	-- RELEASE THE SPIRIT AFTER SIPHONING
+	if mod.release_pending then
+		if not pet then mod.release_pending = nil return false end
+		util.input('/pet "Release" <me>')
+		mod.release_pending = nil
+		return true
+	end
+
+	if not mod.ready or me.JA_locked or me.in_town or me.mpp >= statics.siphon_mpp then return false end
+	local spirit, matches_day = siphon_spirit(pet)
+	if not spirit then return false end
+
+	-- THE RIGHT SPIRIT IS OUT: SIPHON
+	if pet and util.fuzzy(pet.Name) == util.fuzzy(spirit.en) then
+		if settling then return true end -- wait; make_decision retries on its timeout
+		logger(chat_colors.grey, '[SIPHON MODULE] Using "' .. mod.res.en .. '" on ' .. spirit.en .. (matches_day and ' (matches the day)' or ' (day spirit unavailable)') .. '...')
+		cast(mod.res.prefix, mod.res.en, '<me>')
+		mod.release_pending = true
+		schedule_module_readiness(mod)
+		return true
+
+	-- ANOTHER PET IS OUT: RELEASE IT FIRST
+	elseif pet then
+		if settling then return true end
+		logger(chat_colors.grey, '[SIPHON MODULE] Releasing "' .. pet.Name .. '" to summon ' .. spirit.en .. '...')
+		util.input('/pet "Release" <me>')
+		return true
+
+	-- NO PET: SUMMON THE SPIRIT
+	elseif me.mp >= spirit.mp_cost and spell_recast(spirit.id) == 0 then
+		logger(chat_colors.grey, '[SIPHON MODULE] Summoning "' .. spirit.en .. '" to siphon its MP...')
+		cast(spirit.prefix, spirit.en, '<me>')
+		return true
+	end
+	return false
+end
+
 function use_module()
 	local party_has = function(name) return util.contains(me.party or {}, name) end
+
+	-- ELEMENTAL SIPHON MODULE (checked first: it's a multi-step sequence that must finish once started)
+	if siphon_step() then return true end
 
 	-- MOOGLE/TRUST-TARGET MODULES IN-TOWN NOTICE
 	if me.in_town and me.can_summon_trusts then

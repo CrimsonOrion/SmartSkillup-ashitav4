@@ -128,6 +128,9 @@ end
 -------------------------------------------------------------------------------------------------------------------
 local function rgba(c) return {c[1] / 255, c[2] / 255, c[3] / 255, 1} end
 
+-- ImGui text functions treat their text as a printf format, so a literal % must be doubled (ex: "50% MP")
+local function esc(text) return (tostring(text):gsub("%%", "%%%%")) end
+
 -- A theme matching the Button002 images: dark navy body, periwinkle border, button-blue headers, orange when pressed.
 -- Push before Begin/BeginTooltip (window styling is read there) and pop after End/EndTooltip.
 local theme_colors = {
@@ -173,10 +176,10 @@ local function modules_popup(s)
 		local mod = modules and modules[help.key]
 		local available, on = mod and mod.available, mod and mod.active
 		local name_color = on and colors.orange or (available and colors.white or {140, 140, 140})
-		imgui.TextColored(rgba(name_color), help.name .. (on and '  (on)' or (not available and '  (not available on this job)' or '')))
+		imgui.TextColored(rgba(name_color), esc(help.name .. (on and '  (on)' or (not available and '  (not available on this job)' or ''))))
 		imgui.Indent(12 * s)
 		imgui.PushStyleColor(ImGuiCol_Text, rgba(available and {200, 200, 200} or {140, 140, 140}))
-		imgui.TextWrapped(help.text)
+		imgui.TextWrapped(esc(help.text))
 		imgui.PopStyleColor(1)
 		imgui.Unindent(12 * s)
 	end
@@ -207,7 +210,7 @@ local function help_window(s, anchor_x, anchor_y)
 	local flags = bit.bor(ImGuiWindowFlags_NoCollapse, ImGuiWindowFlags_AlwaysAutoResize, ImGuiWindowFlags_NoSavedSettings)
 	push_theme(s)
 	if imgui.Begin('SmartSkillup Help##sms_help', ui.help_open, flags) then
-		imgui.TextColored(rgba(colors.yellow), 'SmartSkillup v' .. addon.version .. ' commands  (type /sms [command])')
+		imgui.TextColored(rgba(colors.yellow), esc('SmartSkillup v' .. addon.version .. ' commands  (type /sms [command])'))
 		local table_flags = bit.bor(ImGuiTableFlags_SizingFixedFit, ImGuiTableFlags_NoSavedSettings)
 		for _, group in ipairs(statics.command_help) do
 			if imgui.CollapsingHeader(group.section .. ' (' .. #group.commands .. ')##sms_help_' .. group.section) then
@@ -217,10 +220,10 @@ local function help_window(s, anchor_x, anchor_y)
 					for _, entry in ipairs(group.commands) do
 						imgui.TableNextRow()
 						imgui.TableSetColumnIndex(0)
-						imgui.TextColored(rgba(colors.orange), entry[1])
+						imgui.TextColored(rgba(colors.orange), esc(entry[1]))
 						imgui.TableSetColumnIndex(1)
 						imgui.PushStyleColor(ImGuiCol_Text, rgba({220, 220, 220}))
-						imgui.TextWrapped(entry[2])
+						imgui.TextWrapped(esc(entry[2]))
 						imgui.PopStyleColor(1)
 					end
 					imgui.EndTable()
@@ -231,7 +234,7 @@ local function help_window(s, anchor_x, anchor_y)
 			imgui.PushTextWrapPos(imgui.GetCursorPosX() + cmd_w + desc_w)
 			for _, tip in ipairs(statics.help_tips) do
 				imgui.PushStyleColor(ImGuiCol_Text, rgba({220, 220, 220}))
-				imgui.TextWrapped('- ' .. tip)
+				imgui.TextWrapped(esc('- ' .. tip))
 				imgui.PopStyleColor(1)
 			end
 			imgui.PopTextWrapPos()
@@ -312,7 +315,7 @@ function ui.render()
 				clicked[item[1]] = was_clicked
 				if item[1] == 'paused' and was_hovered and event_paused then
 					push_theme(s)
-					imgui.SetTooltip('Event pauses: ' .. table.concat(util.keys(event_pauses, true), ', '))
+					imgui.SetTooltip(esc('Event pauses: ' .. table.concat(util.keys(event_pauses, true), ', ')))
 					pop_theme()
 				elseif item[1] == 'help' and was_hovered then
 					help_hint(s)

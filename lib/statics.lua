@@ -42,6 +42,7 @@ statics.modules_order = { -- used to build the modules in a strict order
 	'food',
 	'moogle',
 	'convert',
+	'siphon',
 	'refresh',
 	'haste',
 	'georef',
@@ -54,6 +55,7 @@ statics.module_help = { -- shared by /sms modulehelp and the UI's MODULES popup 
 	{key = 'food',     name = 'SkillUp Food', text = 'Uses the best magic food available in your inventory, sack, satchel, or case.'},
 	{key = 'moogle',   name = 'Moogle',       text = 'Summons the "Moogle" trust to utilize its refresh and skillup rate boost.', job_only = true},
 	{key = 'convert',  name = 'Convert',      text = 'Uses convert when MP is below 25%. Requires a cure spell for use in recovering.', job_only = true},
+	{key = 'siphon',   name = 'Elemental Siphon', text = 'Below 50% MP, summons the spirit matching the day, uses Elemental Siphon, then releases it.', job_only = true},
 	{key = 'refresh',  name = 'Refresh',      text = 'Casts the most potent refresh available to your main/sub jobs.', job_only = true},
 	{key = 'haste',    name = 'Haste',        text = 'Casts the most potent haste available to your main/sub jobs.', job_only = true},
 	{key = 'georef',   name = 'Geo-Refresh',  text = 'Sustains a Geo-Refresh colure on the player.', job_only = true},
@@ -101,6 +103,12 @@ statics.help_tips = {
 	'You can only receive skillups for skills natively available to your current main job.',
 	'The UI can be dragged with right mouse clicks or zoomed with scroll! Try it out!',
 	'For additional module information, type "/sms modulehelp" or hover over MODULES!',
+}
+
+statics.siphon_mpp = 50 -- the Elemental Siphon module triggers below this MP%
+
+statics.spirits_by_weekday = { -- Vana'diel weekday (0: Firesday ... 7: Darksday) + 1 -> the matching spirit
+	'Fire Spirit', 'Earth Spirit', 'Water Spirit', 'Air Spirit', 'Ice Spirit', 'Thunder Spirit', 'Light Spirit', 'Dark Spirit',
 }
 
 statics.numerals ={'',' II',' III',' IV',' V',' VI'}
